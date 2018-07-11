@@ -11,8 +11,8 @@ puzma :: Parser Puzzle
 puzma = do
         puzzleGrid <- gridP
         gridObjects <- many objectP
-        return Puzzle { grid = puzzleGrid,
-                        objects = gridObjects }
+        return Puzzle { mGrid = puzzleGrid,
+                        mObjects = gridObjects }
 
 gridP :: Parser Grid
 gridP = do
@@ -39,7 +39,7 @@ propertyP = do
            value <- read <$> many1 digit
            return (key, value)
 
-coordinateP :: Parser Coord
+coordinateP :: Parser GridCoord
 coordinateP = do
               spaces >> char '(' >> spaces
               xValue <- read <$> many1 digit
