@@ -20,7 +20,7 @@ genGrid grid = "<rect x=\"" ++ show d ++ "\" y=\"" ++ show d ++ "\" width=\"" ++
 genClue :: Int -> Object -> String
 genClue d clue = let (x, y) = coordTransform (location clue) d
                      e = quot d 2
-                 in  "<text x=\"" ++ show (x + e) ++ "\" y= \"" ++ show (y + e) ++
+                 in  "<text x=\"" ++ show (x - e) ++ "\" y= \"" ++ show (y - e) ++
                      "\" text-anchor=\"middle\" alignment-baseline=\"central\" style=\"font: " ++
                      show (2 * (quot d 3)) ++ "px helvetica;\">" ++ content clue ++ "</text>"
                      -- font size is 2/3 of grid size
