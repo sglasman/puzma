@@ -17,8 +17,8 @@ puzma = do
 gridP :: Parser Grid
 gridP = do
         spaces >> string "RectangleGrid" >> spaces >> char '{'
-        gridProperties <- sepBy propertyP (spaces >> char ',')
-        char '}'
+        gridProperties <- sepBy propertyP (try $ spaces >> char ',')
+        spaces >> char '}'
         return Rectangle { height = maybe (error "Error: grid has undefined height") id $ lookup "height" gridProperties,
                            width = maybe (error "Error: grid has undefined width") id $ lookup "width" gridProperties,
                            gridsize = maybe 36 id $ lookup "gridsize" gridProperties }
@@ -29,6 +29,7 @@ objectP = do
           clueLocation <- coordinateP
           spaces >> string "Clue" >> spaces >> char '{'
           clueContent <- many $ satisfy (/= '}')
+          char '}'
           return Clue { content = clueContent, location = clueLocation }
 
 propertyP :: Parser (String, Int)
