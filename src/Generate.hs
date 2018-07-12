@@ -22,9 +22,8 @@ genClue :: Int -> Object -> String
 genClue d clue = let (x, y) = coordTransform (location clue) d
                      e = quot d 2
                  in  "<text x=\"" ++ show (x - e) ++ "\" y=\"" ++ show (y - e) ++
-                     "\" text-anchor=\"middle\" dy=\"" ++ show (quot d 4) ++ "\" style=\"font: " ++
-                     show (2 * (quot d 3)) ++ "px helvetica;\">" ++ content clue ++ "</text>"
-                     -- font size is 2/3 of grid size
+                     "\" text-anchor=\"middle\" dy=\"" ++ show (quot d 4) ++ "\" style=\"font: " ++ -- positioning the clue 1/4 of the way down the cell seems to look nice
+                     show (2 * (quot d 3)) ++ "px helvetica;\">" ++ content clue ++ "</text>" -- font size is 2/3 of grid size
 
 
 gridLine :: GridCoord -> GridCoord -> Int -> Int -> String -- draw a line from grid coordinates (x1, y1) to (x2, y2) of width w, supply the grid size d
@@ -47,7 +46,7 @@ genViewBox puzzle = let coords = map location $ mObjects puzzle
                         m = height $ mGrid puzzle
                         n = width $ mGrid puzzle
                         d = gridsize $ mGrid puzzle
-                    in show ((min minX (-1)) * d) ++ " " ++
+                    in show ((min minX (-1)) * d) ++ " " ++ -- using -1 here enforces a 1-cell margin
                        show ((min minY (-1)) * d) ++ " " ++
                        show ((max (maxX - minX + 2) (n + 2)) * d) ++ " " ++
                        show ((max (maxY - minY + 2) (m + 2)) * d)
