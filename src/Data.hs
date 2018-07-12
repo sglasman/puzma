@@ -7,7 +7,7 @@ data Grid = Rectangle { height :: Int,
                         width :: Int,
                         gridsize :: Int } deriving (Show)
                         
-data Object = Clue { content :: String,
+data Object = Object { content :: String,
                      location :: GridCoord }deriving (Show)
 
 

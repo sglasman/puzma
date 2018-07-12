@@ -30,7 +30,7 @@ objectP = do
           spaces >> string "Clue" >> spaces >> char '{'
           clueContent <- many $ satisfy (/= '}')
           char '}'
-          return Clue { content = clueContent, location = clueLocation }
+          return Object { content = clueContent, location = clueLocation }
 
 propertyP :: Parser (String, Int)
 propertyP = do
