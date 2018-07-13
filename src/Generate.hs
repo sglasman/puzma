@@ -9,7 +9,6 @@ genPuzzle puzzle = "<svg xmlns=\"http://www.w3.org/2000/svg\" " ++ -- svg boiler
                    (puzzleObjects puzzle >>= genClue (gridsize $ puzzleGrid puzzle)) ++
                    "</svg>"
 
-
 genGrid :: Grid -> String
 genGrid grid = "<rect x=\"0\" y=\"0\" width=\"" ++ show (d * n) ++ "\" height=\"" ++ show (d * m) ++ "\" stroke=\"black\" stroke-width=\"4\" fill=\"none\"/>" ++ -- outer rectangle
                ([1..(m-1)] >>= (\i -> gridLine (0, 2 * i) (2 * n, 2 * i) 1 d)) ++ -- horizontal grid lines

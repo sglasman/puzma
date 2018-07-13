@@ -9,8 +9,16 @@ import Generate
 
 main :: IO ()
 main = do
-       filename <- (!! 0) <$> getArgs
-       code <- readFile filename
-       writeFile (svgFilename filename) (genPuzzle $
-                                         either (\_ -> error "Parse error") id $ parse puzma "" code)
-       where svgFilename = (++ ".svg") . takeWhile (\c -> c /= '.')
+       args <- getArgs
+       let l = length args
+       case l of
+              0 -> error "Input filename required"
+              1 -> putStrLn "Output filename not supplied: will use default derived from input filename"
+              _ -> return ()
+       inputFilename <- (!! 0) <$> getArgs
+       let outputFilename = if l == 1 then defaultFilename inputFilename else args !! 1
+       code <- readFile inputFilename
+       either (putStrLn . show)
+              (writeFile outputFilename . genPuzzle)
+              (parse puzma "" code)
+       where defaultFilename = reverse . ("gvs" ++) . dropWhile (/= '.') . reverse
