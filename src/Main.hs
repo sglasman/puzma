@@ -15,7 +15,7 @@ main = do
               0 -> error "Input filename required"
               1 -> putStrLn "Output filename not supplied: will use default derived from input filename"
               _ -> return ()
-       inputFilename <- (!! 0) <$> getArgs
+       let inputFilename = args !! 0
        let outputFilename = if l == 1 then defaultFilename inputFilename else args !! 1
        code <- readFile inputFilename
        either (putStrLn . show)

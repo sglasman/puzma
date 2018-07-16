@@ -16,23 +16,23 @@ puzma = do
                         puzzleObjects = gridObjects }
 
 gridP :: Parser Grid
-gridP = do
-        spaces >> string "RectangleGrid" >> spaces >> char '{'
-        gridProperties <- sepBy propertyP (try $ spaces >> char ',')
-        spaces >> char '}'
-        return Rectangle { height = maybe (error "Error: grid has undefined height") id $ lookup "height" gridProperties,
-                           width = maybe (error "Error: grid has undefined width") id $ lookup "width" gridProperties,
-                           gridsize = maybe 36 id $ lookup "gridsize" gridProperties,
-                           thickLines = [] }
+gridP = (try rectangleGridP) <|> sudokuGridP
 
-objectP :: Parser Object
-objectP = do
-          spaces >> string "at"
-          clueLocation <- coordinateP
-          spaces >> string "Clue" >> spaces >> char '{'
-          clueContent <- many $ satisfy (/= '}')
-          char '}'
-          return Object { content = clueContent, location = clueLocation }
+rectangleGridP :: Parser Grid
+rectangleGridP = do
+                 spaces >> string "RectangleGrid" >> spaces >> char '{'
+                 gridProperties <- sepBy propertyP (try $ spaces >> char ',')
+                 spaces >> char '}'
+                 return Rectangle { height = maybe (error "Error: grid has undefined height") id $ lookup "height" gridProperties,
+                                   width = maybe (error "Error: grid has undefined width") id $ lookup "width" gridProperties,
+                                   gridsize = maybe 36 id $ lookup "gridsize" gridProperties }
+
+sudokuGridP :: Parser Grid
+sudokuGridP = do
+              spaces >> string "SudokuGrid" >> spaces >> char '{'
+              gridProperties <- sepBy propertyP (try $ spaces >> char ',')
+              spaces >> char '}'
+              return Sudoku { gridsize = maybe 36 id $ lookup "gridsize" gridProperties }
 
 propertyP :: Parser (String, Int)
 propertyP = do
@@ -41,6 +41,21 @@ propertyP = do
            spaces >> char ':' >> spaces
            value <- read <$> many1 digit
            return (key, value)
+
+objectP :: Parser Object
+objectP = (try $ LocatedClueObject <$> locatedClueP) <|> (LineObject <$> lineP)
+
+locatedClueP :: Parser LocatedClue
+locatedClueP = do
+               spaces >> string "at"
+               clueLocation <- coordinateP
+               spaces >> string "Clue" >> spaces >> char '{'
+               clueContent <- many $ satisfy (/= '}')
+               char '}'
+               return LocatedClue { locatedClueClue = BasicClue clueContent, locatedClueLocation = clueLocation }
+
+lineP :: Parser Data.Line
+lineP = thickLineP
 
 coordinateP :: Parser GridCoord
 coordinateP = do
@@ -72,6 +87,21 @@ interstitialRightCoordP = do
                           val <- normalizeInterstitial <$> int
                           spaces >> char '>'
                           return val
+
+thickLineP :: Parser Data.Line
+thickLineP = do
+             spaces >> string "thickLine"
+             endpoints <- lineEndpointsP
+             return $ Line endpoints 4
+
+lineEndpointsP :: Parser LineEndpoints
+lineEndpointsP = do
+                 spaces >> char '['
+                 start <- coordinateP
+                 spaces >> char ','
+                 end <- coordinateP
+                 spaces >> char ']'
+                 return $ LineEndpoints start end
 
 normalizeCentral :: Int -> Int
 normalizeCentral n = 2 * n - 1
