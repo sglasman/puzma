@@ -49,10 +49,21 @@ locatedClueP :: Parser LocatedClue
 locatedClueP = do
                spaces >> string "at"
                clueLocation <- coordinateP
-               spaces >> string "Clue" >> spaces >> char '{'
-               clueContent <- many $ satisfy (/= '}')
-               char '}'
-               return LocatedClue { locatedClueClue = BasicClue clueContent, locatedClueLocation = clueLocation }
+               clue <- clueP
+               return LocatedClue { locatedClueClue = clue, locatedClueLocation = clueLocation }
+
+clueP :: Parser Clue
+clueP = (try basicClueP) <|> shadedSquareP
+
+basicClueP :: Parser Clue
+basicClueP = do
+             spaces >> string "Clue" >> spaces >> char '{'
+             content <- many $ satisfy (/= '}')
+             char '}'
+             return $ BasicClue content
+
+shadedSquareP :: Parser Clue
+shadedSquareP = spaces >> (string "shadedCell" <|> string "#") >> return ShadedCell
 
 lineP :: Parser Data.Line
 lineP = thickLineP

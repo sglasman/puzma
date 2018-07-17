@@ -13,7 +13,8 @@ data Object = LineObject Line | LocatedClueObject LocatedClue deriving (Show)
 data LocatedClue = LocatedClue { locatedClueClue :: Clue,
                                  locatedClueLocation :: GridCoord } deriving (Show)
 
-data Clue = BasicClue { clueContent :: String } deriving (Show)
+data Clue = BasicClue { clueContent :: String } |
+            ShadedCell deriving (Show)
 
 data Line = Line { lineEndpoints :: LineEndpoints,
                    lineThickness :: Int } deriving (Show)
