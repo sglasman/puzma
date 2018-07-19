@@ -30,6 +30,7 @@ genLocatedClue d (LocatedClue (BasicClue content) location) = let (x, y) = coord
 genLocatedClue d (LocatedClue ShadedCell location) = let (x, y) = coordTransform location d
                                                          e = quot d 2
                                                      in "<rect x=\"" ++ show (x - e) ++ "\" y=\"" ++ show (y - e) ++ "\" width=\"" ++ show d ++ "\" height=\"" ++ show d ++ "\"/>"
+genLocatedClue _ (LocatedClue EmptyCell _) = ""
 
 gridLine :: GridCoord -> GridCoord -> Int -> Int -> String -- draw a line from grid coordinates (x1, y1) to (x2, y2) of width w, supply the grid size d
 gridLine start end w d = pixLine (coordTransform start d) (coordTransform end d) w
@@ -51,13 +52,13 @@ genViewBox puzzle = let coords = puzzleObjects puzzle >>= objectCoords
                         m = gridHeight $ puzzleGrid puzzle
                         n = gridWidth $ puzzleGrid puzzle
                         d = gridsize $ puzzleGrid puzzle
-                    in show (quot ((min (minX - 3) (-2)) * d) 2) ++ " " ++ -- using -3 here enforces a 1-cell margin
+                    in show (quot ((min (minX - 3) (-2)) * d) 2) ++ " " ++ -- using these constants enforces a 1-cell margin
                        show (quot ((min (minY - 3) (-2)) * d) 2) ++ " " ++
                        show (quot (maximum [
-                                            maxX - minX + 6, 2 * n + 4, 2 * n - minX + 4, maxX + 6
+                                            maxX - minX + 6, 2 * n + 4, 2 * n - minX + 5, maxX + 3
                                            ] * d) 2) ++ " " ++
                        show (quot (maximum [
-                                            maxY - minY + 6, 2 * n + 4, 2 * n - minY + 4, maxY + 6
+                                            maxY - minY + 6, 2 * m + 4, 2 * m - minY + 5, maxY + 3
                                            ] * d) 2)
 
 objectCoords :: Object -> [GridCoord]
@@ -78,5 +79,4 @@ safeMinimum l = minimum l
 
 safeMaximum :: (Ord a, Num a) => [a] -> a
 safeMaximum [] = 1
-safeMaximum l = minimum l
-
+safeMaximum l = maximum l

@@ -11,9 +11,12 @@ type Parser a = Parsec String () a
 puzma :: Parser Puzzle
 puzma = do
         grid <- gridP
-        gridObjects <- many objectP
+        layoutObjects <- concat <$> (many $ try layoutP)
+        otherObjects <- many objectP
         return Puzzle { puzzleGrid = grid,
-                        puzzleObjects = gridObjects }
+                        puzzleObjects = layoutObjects ++ otherObjects }
+
+-- Grid parsers
 
 gridP :: Parser Grid
 gridP = (try rectangleGridP) <|> sudokuGridP
@@ -42,6 +45,54 @@ propertyP = do
            value <- read <$> many1 digit
            return (key, value)
 
+-- Layout parsers
+
+layoutP :: Parser [Object]
+layoutP = (try rowColLayoutP) <|> gridLayoutP
+
+rowColLayoutP :: Parser [Object]
+rowColLayoutP = do
+                spaces
+                whichLayout <- (string "RowLayout") <|> (string "ColumnLayout")
+                rowCoord <- (try centralLeftCoordP) <|> interstitialLeftCoordP
+                spaces >> char ',' >> spaces >> char '['
+                layoutRow <- layoutListP
+                spaces >> char ']' >> spaces
+                rightBracket <- (char ')') <|> (char '>')
+                let rowCoords = map (\x -> (x, rowCoord))
+                                    (map (if rightBracket == ')' then normalizeCentral else normalizeInterstitial)
+                                         [1..(length layoutRow)])
+                let rowColCoords = map (if whichLayout == "RowLayout" then id else (\(a, b) -> (b, a)))
+                                       rowCoords
+                return $ zipWith buildLocatedClue rowColCoords layoutRow
+
+gridLayoutP :: Parser [Object]
+gridLayoutP = do
+              spaces >> string "GridLayout" >> spaces >> char '['
+              layoutRows <- sepBy layoutListP (try $ spaces >> char '|')
+              spaces >> char ']'
+              if (not . allEqual $ map length layoutRows) then (error "Error: layout not rectangular")
+              else return $ zipWith buildLocatedClue
+                                    (concat $ coordArray (length layoutRows) (length $ layoutRows !! 0))
+                                    (concat layoutRows)
+
+layoutListP :: Parser [Clue]
+layoutListP = sepBy layoutClueP (try (spaces >> optional (char ',')))
+
+layoutClueP :: Parser Clue
+layoutClueP = (try (spaces >> char '#' >> return ShadedCell)) <|>
+              (try (spaces >> char '_' >> return EmptyCell)) <|>
+              (try spaces >> (BasicClue . return <$> noneOf ['|', ',', '#', '{', '}', '[', ']', '_'])) <|>
+              (do
+               spaces >> char '{'
+               clue <- (try clueP <|> (BasicClue <$> (many $ satisfy (/= '}'))))
+               spaces >> char '}'
+               return clue)
+
+buildLocatedClue :: GridCoord -> Clue -> Object
+buildLocatedClue coord clue = LocatedClueObject $ LocatedClue clue coord
+-- Object parsers
+
 objectP :: Parser Object
 objectP = (try $ LocatedClueObject <$> locatedClueP) <|> (LineObject <$> lineP)
 
@@ -53,7 +104,7 @@ locatedClueP = do
                return LocatedClue { locatedClueClue = clue, locatedClueLocation = clueLocation }
 
 clueP :: Parser Clue
-clueP = (try basicClueP) <|> shadedSquareP
+clueP = (try basicClueP) <|> shadedCellP
 
 basicClueP :: Parser Clue
 basicClueP = do
@@ -62,8 +113,8 @@ basicClueP = do
              char '}'
              return $ BasicClue content
 
-shadedSquareP :: Parser Clue
-shadedSquareP = spaces >> (string "shadedCell" <|> string "#") >> return ShadedCell
+shadedCellP :: Parser Clue
+shadedCellP = spaces >> (string "ShadedCell" <|> string "#") >> return ShadedCell
 
 lineP :: Parser Data.Line
 lineP = thickLineP
@@ -122,3 +173,11 @@ normalizeInterstitial n = 2 * n
                
 notSpace :: Parser Char
 notSpace = satisfy (not . isSpace)
+
+allEqual :: (Eq a) => [a] -> Bool
+allEqual [] = True
+allEqual [x] = True
+allEqual (x:xs) = (x == head xs) && allEqual xs
+
+coordArray :: Int -> Int -> [[GridCoord]]
+coordArray height width = map (\x -> [(y, x) | y <- map normalizeCentral [1..width]]) $ map normalizeCentral [1..height]
