@@ -2,4 +2,5 @@ RectangleGrid{ height:10, width: 10 }
 RowLayout (0, [_2_3__4_5_])
 at (3, 3) Clue{1}
 at <5, 7> Clue{A}
+at (6, 9) #
 ThickLine [<2,9>, <4,9>]
