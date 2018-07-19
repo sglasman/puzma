@@ -93,8 +93,8 @@ RowLayout/ColumnLayout (ROW INDEX, [CLUES])
 In this case, either of the parentheses can be replaced with angle brackets to place the clues between rows, interstitially within a row, or both. For example, the code
 ```
 RectangleGrid {height:5, width:4} 
-RowLayout (0, [1234]) 
-RowLayout (6, [567]> 
+RowLayout <1, [1234]) 
+RowLayout <4, [567]> 
 ColumnLayout (0, [ABCD]> 
 ColumnLayout (5, [EFGHI])
 ```
