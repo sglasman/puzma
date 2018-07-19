@@ -12,7 +12,7 @@ ThickLine [<2,9>, <4,9>]
 ```
 It produces the image
 
-<img src="https://github.com/sglasman/puzma/blob/master/examples/readme-example.svg"/>
+<img src="https://github.com/sglasman/puzma/blob/master/examples/readme-example.svg" height=864 width=864/>
 
 This project is under active development, so more features (including, hopefully, PDF support) are on their way.
 
@@ -50,7 +50,8 @@ The shortest legal Puzma program is
 SudokuGrid{}
 ```
 which produces the image
-<img src="https://github.com/sglasman/puzma/blob/master/examples/sudoku-example.svg"/>
+
+<img src="https://github.com/sglasman/puzma/blob/master/examples/sudoku-example.svg" height=792 width=792/>
 
 ### Object declarations
 Object declarations are used to place objects at specified locations in the grid. Currently implemented object declarations are of the form
@@ -82,7 +83,8 @@ RectangleGrid {height:3, width:3}
 GridLayout [132|_#{11}|_0#]
 ```
 generates the image
-<img src="https://github.com/sglasman/puzma/blob/master/examples/layout-example.svg"/>
+
+<img src="https://github.com/sglasman/puzma/blob/master/examples/layout-example.svg" height=360 width=360/>
 
 In some cirumstances, you might want to declare a single row or column of clues rather than the whole grid. In this case, you can use the syntax
 ```
@@ -97,4 +99,5 @@ ColumnLayout (0, [ABCD]>
 ColumnLayout (5, [EFGHI])
 ```
 generates the image
-<img src="https://github.com/sglasman/puzma/blob/master/examples/rowlayout-example.svg"/>
+
+<img src="https://github.com/sglasman/puzma/blob/master/examples/rowlayout-example.svg" height=504 width=576/>
