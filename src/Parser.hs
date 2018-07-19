@@ -152,7 +152,7 @@ interstitialRightCoordP = do
 
 thickLineP :: Parser Data.Line
 thickLineP = do
-             spaces >> string "thickLine"
+             spaces >> string "ThickLine"
              endpoints <- lineEndpointsP
              return $ Line endpoints 4
 
