@@ -105,7 +105,7 @@ locatedClueP = do
                return LocatedClue { locatedClueClue = clue, locatedClueLocation = clueLocation }
 
 clueP :: Parser Clue
-clueP = (try basicClueP) <|> (try shadedClueP) <|> shadedCellP
+clueP = (try basicClueP) <|> (try shadedClueP) <|> (try unshadedCircleP) <|> (try shadedCircleP) <|> shadedCellP
 
 shadedClueP :: Parser Clue
 shadedClueP = do
@@ -120,6 +120,12 @@ basicClueP = do
              content <- many $ satisfy (/= '}')
              char '}'
              return $ BasicClue content
+
+unshadedCircleP :: Parser Clue
+unshadedCircleP = spaces >> string "UnshadedCircle" >> return UnshadedCircle
+
+shadedCircleP :: Parser Clue
+shadedCircleP = spaces >> string "ShadedCircle" >> return ShadedCircle
 
 shadedCellP :: Parser Clue
 shadedCellP = spaces >> (string "ShadedCell" <|> string "#") >> return ShadedCell

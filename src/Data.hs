@@ -16,7 +16,9 @@ data LocatedClue = LocatedClue { locatedClueClue :: Clue,
 data Clue = BasicClue String |
             ShadedClue Clue |
             ShadedCell |
-            EmptyCell  deriving (Show)
+            EmptyCell |
+            UnshadedCircle |
+            ShadedCircle deriving (Show)
 
 data Line = Line { lineEndpoints :: LineEndpoints,
                    lineThickness :: Int } deriving (Show)

@@ -4,45 +4,51 @@ import Data
 
 genPuzzle :: Puzzle -> String
 genPuzzle puzzle = "<svg xmlns=\"http://www.w3.org/2000/svg\" " ++ -- svg boilerplate
-                   "viewBox=\"" ++ genViewBox puzzle ++ "\">" ++
+                   "viewBox=\"" ++ genViewBox puzzle ++ "\"><g stroke=\"black\">" ++
                    (genGrid $ puzzleGrid puzzle) ++
                    (puzzleObjects puzzle >>= genObject (gridsize $ puzzleGrid puzzle)) ++
-                   "</svg>"
+                   "</g></svg>"
 
 genGrid :: Grid -> String
-genGrid (Rectangle m n d) = "<rect x=\"0\" y=\"0\" width=\"" ++ show (d * n) ++ "\" height=\"" ++ show (d * m) ++ "\" stroke=\"black\" stroke-width=\"4\" fill=\"none\"/>" ++ -- outer rectangle
-                            ([1..(m-1)] >>= (\i -> gridLine (0, 2 * i) (2 * n, 2 * i) 1 d)) ++ -- horizontal grid lines
-                            ([1..(n-1)] >>= (\j -> gridLine (2 * j, 0) (2 * j, 2 * m) 1 d)) -- vertical grid lines
+genGrid (Rectangle m n d) = "<rect x=\"0\" y=\"0\" width=\"" ++ show (d * n) ++ "\" height=\"" ++ show (d * m) ++ "\" stroke-width=\"4\" fill=\"none\"/>" ++ -- outer rectangle
+                            ([1..(m-1)] >>= (\i -> genGridLine (0, 2 * i) (2 * n, 2 * i) 1 d)) ++ -- horizontal grid lines
+                            ([1..(n-1)] >>= (\j -> genGridLine (2 * j, 0) (2 * j, 2 * m) 1 d)) -- vertical grid lines
 genGrid (Sudoku d) = genGrid (Rectangle 9 9 d) ++
-                     gridLine (0, 6) (18, 6) 4 d ++ gridLine (0, 12) (18, 12) 4 d ++
-                     gridLine (6, 0) (6, 18) 4 d ++ gridLine (12, 0) (12,18) 4 d
+                     genGridLine (0, 6) (18, 6) 4 d ++ genGridLine (0, 12) (18, 12) 4 d ++
+                     genGridLine (6, 0) (6, 18) 4 d ++ genGridLine (12, 0) (12, 18) 4 d
 
 genObject :: Int -> Object -> String
 genObject d (LocatedClueObject locatedClueObject) = genLocatedClue d locatedClueObject
-genObject d (LineObject (Line (LineEndpoints start end) thickness)) = gridLine start end thickness d
+genObject d (LineObject (Line (LineEndpoints start end) thickness)) = genGridLine start end thickness d
 genObject _ _ = ""
 
 genLocatedClue :: Int -> LocatedClue -> String
 genLocatedClue d (LocatedClue (BasicClue content) location) = let (x, y) = coordTransform location d
                                                               in  "<text x=\"" ++ show x ++ "\" y=\"" ++ show y ++
-                                                              "\" text-anchor=\"middle\" dy=\"" ++ show (quot d 4) ++ "\" style=\"font: " ++ -- positioning the clue 1/4 of the way down the cell seems to look nice
+                                                              "\" text-anchor=\"middle\" stroke=\"transparent\" dy=\"" ++ show (quot d 4) ++ "\" style=\"font: " ++ -- positioning the clue 1/4 of the way down the cell seems to look nice
                                                               show (2 * (quot d 3)) ++ "px helvetica;\">" ++ content ++ "</text>" -- font size is 2/3 of grid size
 genLocatedClue d (LocatedClue ShadedCell location) = let (x, y) = coordTransform location d
                                                          e = quot d 2
                                                      in "<rect x=\"" ++ show (x - e) ++ "\" y=\"" ++ show (y - e) ++ "\" width=\"" ++ show d ++ "\" height=\"" ++ show d ++ "\"/>"
 genLocatedClue d (LocatedClue (ShadedClue clue) location) = genLocatedClue d (LocatedClue ShadedCell location) ++
-                                                            "<g fill=\"white\">" ++
+                                                            "<g fill=\"white\" stroke=\"white\">" ++
                                                             genLocatedClue d (LocatedClue clue location) ++
                                                             "</g>"
+genLocatedClue d (LocatedClue UnshadedCircle location) = genCircle d (coordTransform location d) False
+genLocatedClue d (LocatedClue ShadedCircle location) = genCircle d (coordTransform location d) True
 genLocatedClue _ (LocatedClue EmptyCell _) = ""
 
-gridLine :: GridCoord -> GridCoord -> Int -> Int -> String -- draw a line from grid coordinates (x1, y1) to (x2, y2) of width w, supply the grid size d
-gridLine start end w d = pixLine (coordTransform start d) (coordTransform end d) w
+genCircle :: Int -> GridCoord -> Bool -> String
+genCircle d (x, y) shaded = "<circle cx=\"" ++ show x ++ "\" cy=\"" ++ show y ++ "\" r=\"" ++ show (quot d 3) ++ "\"" ++
+                            (if shaded then "" else " fill=\"none\"") ++ " stroke-width=\"2\"/>"
 
-pixLine :: PixelCoord -> PixelCoord -> Int -> String -- draw a line from pixel coordinates (x1, y1) to (x2, y2) of width w
-pixLine (x1, y1) (x2, y2) w = "<line x1=\"" ++ show x1 ++ "\" x2=\"" ++ show x2 ++
+genGridLine :: GridCoord -> GridCoord -> Int -> Int -> String -- draw a line from grid coordinates (x1, y1) to (x2, y2) of width w, supply the grid size d
+genGridLine start end w d = genPixLine (coordTransform start d) (coordTransform end d) w
+
+genPixLine :: PixelCoord -> PixelCoord -> Int -> String -- draw a line from pixel coordinates (x1, y1) to (x2, y2) of width w
+genPixLine (x1, y1) (x2, y2) w = "<line x1=\"" ++ show x1 ++ "\" x2=\"" ++ show x2 ++
                               "\" y1=\"" ++ show y1 ++ "\" y2 = \"" ++ show y2 ++
-                              "\" stroke=\"black\" stroke-linecap=\"square\" stroke-width=\"" ++ show w ++ "\"/>"
+                              "\" stroke-linecap=\"square\" stroke-width=\"" ++ show w ++ "\"/>"
 
 coordTransform :: GridCoord -> Int -> PixelCoord
 coordTransform (x, y) d = ((d * x) `quot` 2, (d * y) `quot` 2)
