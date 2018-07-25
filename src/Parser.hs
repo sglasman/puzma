@@ -91,6 +91,7 @@ layoutClueP = (try (spaces >> char '#' >> return ShadedCell)) <|>
 
 buildLocatedClue :: GridCoord -> Clue -> Object
 buildLocatedClue coord clue = LocatedClueObject $ LocatedClue clue coord
+
 -- Object parsers
 
 objectP :: Parser Object
@@ -104,7 +105,14 @@ locatedClueP = do
                return LocatedClue { locatedClueClue = clue, locatedClueLocation = clueLocation }
 
 clueP :: Parser Clue
-clueP = (try basicClueP) <|> shadedCellP
+clueP = (try basicClueP) <|> (try shadedClueP) <|> shadedCellP
+
+shadedClueP :: Parser Clue
+shadedClueP = do
+              spaces >> string "Shaded" >> spaces >> char '{'
+              clue <- clueP
+              spaces >> char '}'
+              return $ ShadedClue clue
 
 basicClueP :: Parser Clue
 basicClueP = do

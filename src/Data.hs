@@ -13,7 +13,8 @@ data Object = LineObject Line | LocatedClueObject LocatedClue deriving (Show)
 data LocatedClue = LocatedClue { locatedClueClue :: Clue,
                                  locatedClueLocation :: GridCoord } deriving (Show)
 
-data Clue = BasicClue { clueContent :: String } |
+data Clue = BasicClue String |
+            ShadedClue Clue |
             ShadedCell |
             EmptyCell  deriving (Show)
 

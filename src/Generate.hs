@@ -30,6 +30,10 @@ genLocatedClue d (LocatedClue (BasicClue content) location) = let (x, y) = coord
 genLocatedClue d (LocatedClue ShadedCell location) = let (x, y) = coordTransform location d
                                                          e = quot d 2
                                                      in "<rect x=\"" ++ show (x - e) ++ "\" y=\"" ++ show (y - e) ++ "\" width=\"" ++ show d ++ "\" height=\"" ++ show d ++ "\"/>"
+genLocatedClue d (LocatedClue (ShadedClue clue) location) = genLocatedClue d (LocatedClue ShadedCell location) ++
+                                                            "<g fill=\"white\">" ++
+                                                            genLocatedClue d (LocatedClue clue location) ++
+                                                            "</g>"
 genLocatedClue _ (LocatedClue EmptyCell _) = ""
 
 gridLine :: GridCoord -> GridCoord -> Int -> Int -> String -- draw a line from grid coordinates (x1, y1) to (x2, y2) of width w, supply the grid size d
