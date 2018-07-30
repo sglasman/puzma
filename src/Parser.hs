@@ -72,9 +72,9 @@ gridLayoutP = do
               layoutRows <- sepBy layoutListP (try $ spaces >> char '|')
               spaces >> char ']'
               if (not . allEqual $ map length layoutRows) then (error "Error: layout not rectangular")
-              else return $ zipWith buildLocatedClue
-                                    (concat $ coordArray (length layoutRows) (length $ layoutRows !! 0))
-                                    (concat layoutRows)
+                                                          else return $ zipWith buildLocatedClue
+                                                                                (concat $ coordArray (length layoutRows) (length $ layoutRows !! 0))
+                                                                                (concat layoutRows)
 
 layoutListP :: Parser [Clue]
 layoutListP = sepBy layoutClueP (try (spaces >> optional (char ',')))
@@ -109,14 +109,14 @@ clueP = (try basicClueP) <|> (try shadedClueP) <|> (try unshadedCircleP) <|> (tr
 
 shadedClueP :: Parser Clue
 shadedClueP = do
-              spaces >> string "Shaded" >> spaces >> char '{'
+              spaces >> (string "Shaded" <|> string "#") >> spaces >> char '{'
               clue <- clueP
               spaces >> char '}'
               return $ ShadedClue clue
 
 basicClueP :: Parser Clue
 basicClueP = do
-             spaces >> string "Clue" >> spaces >> char '{'
+             spaces >> optional (string "Clue") >> spaces >> char '{'
              content <- many $ satisfy (/= '}')
              char '}'
              return $ BasicClue content
