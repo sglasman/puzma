@@ -26,24 +26,31 @@ rectangleGridP = do
                  spaces >> string "RectangleGrid" >> spaces >> char '{'
                  gridProperties <- sepBy propertyP (try $ spaces >> char ',')
                  spaces >> char '}'
-                 return Rectangle { height = maybe (error "Error: grid has undefined height") id $ lookup "height" gridProperties,
-                                   width = maybe (error "Error: grid has undefined width") id $ lookup "width" gridProperties,
-                                   gridsize = maybe 36 id $ lookup "gridsize" gridProperties }
+                 return Rectangle { height = maybe (error "Error: grid has undefined height") read $ lookup "height" gridProperties,
+                                   width = maybe (error "Error: grid has undefined width") read $ lookup "width" gridProperties,
+                                   gridsize = maybe 36 read $ lookup "gridsize" gridProperties,
+                                   gridstyle = maybe NormalLinestyle stringToLinestyle $ lookup "gridstyle" gridProperties,
+                                   borderstyle = maybe NormalLinestyle stringToLinestyle $ lookup "borderstyle" gridProperties }
 
 sudokuGridP :: Parser Grid
 sudokuGridP = do
               spaces >> string "SudokuGrid" >> spaces >> char '{'
               gridProperties <- sepBy propertyP (try $ spaces >> char ',')
               spaces >> char '}'
-              return Sudoku { gridsize = maybe 36 id $ lookup "gridsize" gridProperties }
+              return Sudoku { gridsize = maybe 36 read $ lookup "gridsize" gridProperties }
 
-propertyP :: Parser (String, Int)
+propertyP :: Parser (String, String)
 propertyP = do
            spaces
            key <- many1 letter
            spaces >> char ':' >> spaces
-           value <- read <$> many1 digit
+           value <- many1 $ noneOf [',', '}', ' ']
            return (key, value)
+
+stringToLinestyle :: String -> Linestyle
+stringToLinestyle "normal" = NormalLinestyle
+stringToLinestyle "dotted" = DottedLinestyle
+stringToLinestyle _ = error "Invalid line style in grid declaration"
 
 -- Layout parsers
 
@@ -168,7 +175,7 @@ thickLineP :: Parser Data.Line
 thickLineP = do
              spaces >> string "ThickLine"
              endpoints <- lineEndpointsP
-             return $ Line endpoints 4
+             return $ Line endpoints 4 NormalLinestyle
 
 lineEndpointsP :: Parser LineEndpoints
 lineEndpointsP = do
