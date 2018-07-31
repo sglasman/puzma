@@ -13,6 +13,7 @@ puzma = do
         grid <- gridP
         layoutObjects <- concat <$> (many $ try layoutP)
         otherObjects <- many objectP
+        spaces >> eof
         return Puzzle { puzzleGrid = grid,
                         puzzleObjects = layoutObjects ++ otherObjects }
 
@@ -112,13 +113,12 @@ locatedClueP = do
                return LocatedClue { locatedClueClue = clue, locatedClueLocation = clueLocation }
 
 clueP :: Parser Clue
-clueP = (try basicClueP) <|> (try shadedClueP) <|> (try unshadedCircleP) <|> (try shadedCircleP) <|> shadedCellP
+clueP = (try unshadedCircleP) <|> (try shadedCircleP) <|> (try shadedClueP) <|> (try shadedCellP) <|> basicClueP
 
 shadedClueP :: Parser Clue
 shadedClueP = do
-              spaces >> (string "Shaded" <|> string "#") >> spaces >> char '{'
-              clue <- clueP
-              spaces >> char '}'
+              spaces >> (string "Shaded" <|> string "#")
+              clue <- (try (spaces >> char '{' >> clueP <* spaces <* char '}')) <|> basicClueP
               return $ ShadedClue clue
 
 basicClueP :: Parser Clue
