@@ -26,9 +26,9 @@ genObject _ _ = ""
 
 genLocatedClue :: Int -> LocatedClue -> String
 genLocatedClue d (LocatedClue (BasicClue content) location) = let (x, y) = coordTransform location d
-                                                              in  "<text x=\"" ++ show x ++ "\" y=\"" ++ show y ++
-                                                                  "\" text-anchor=\"middle\" stroke=\"transparent\" dy=\"" ++ show (quot d 4) ++ "\" style=\"font: " ++ -- positioning the clue 1/4 of the way down the cell seems to look nice
-                                                                  show (2 * (quot d 3)) ++ "px helvetica;\">" ++ content ++ "</text>" -- font size is 2/3 of grid size
+                                                              in placeString x y 0 (quot d 4) (quot (2 * d) 3) content
+genLocatedClue d (LocatedClue (SmallClue content) location) = let (x, y) = coordTransform location d
+                                                              in placeString x y (quot (-3 * d) 8) (quot (-5 * d) 18) (quot d 6) content
 genLocatedClue d (LocatedClue ShadedCell location) = let (x, y) = coordTransform location d
                                                          e = quot d 2
                                                      in "<rect x=\"" ++ show (x - e) ++ "\" y=\"" ++ show (y - e) ++ "\" width=\"" ++ show d ++ "\" height=\"" ++ show d ++ "\"/>"
@@ -39,6 +39,12 @@ genLocatedClue d (LocatedClue (ShadedClue clue) location) = genLocatedClue d (Lo
 genLocatedClue d (LocatedClue UnshadedCircle location) = genCircle d (coordTransform location d) False
 genLocatedClue d (LocatedClue ShadedCircle location) = genCircle d (coordTransform location d) True
 genLocatedClue _ (LocatedClue EmptyCell _) = ""
+
+placeString :: Int -> Int -> Int -> Int -> Int -> String -> String
+placeString x y dx dy fontsize content = "<text x=\"" ++ show x ++ "\" y=\"" ++ show y ++
+                                         "\" text-anchor=\"middle\" stroke=\"transparent\" dx=\"" ++ show dx ++
+                                         "\" dy=\"" ++ show dy ++ "\" style=\"font: " ++
+                                         show fontsize ++ "px helvetica;\">" ++ content ++ "</text>"
 
 genCircle :: Int -> GridCoord -> Bool -> String
 genCircle d (x, y) shaded = "<circle cx=\"" ++ show x ++ "\" cy=\"" ++ show y ++ "\" r=\"" ++ show (quot d 3) ++ "\"" ++

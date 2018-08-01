@@ -16,6 +16,7 @@ data LocatedClue = LocatedClue { locatedClueClue :: Clue,
                                  locatedClueLocation :: GridCoord } deriving (Show)
 
 data Clue = BasicClue String |
+            SmallClue String |
             ShadedClue Clue |
             ShadedCell |
             EmptyCell |

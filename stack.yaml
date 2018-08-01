@@ -4,3 +4,5 @@ packages:
 extra-deps:
 - parsec-numbers-0.1.0
 resolver: lts-12.0
+ghc-options:
+  "$everything": -fno-warn-overlapping-patterns
