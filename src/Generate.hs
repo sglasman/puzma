@@ -1,6 +1,6 @@
 module Generate where
 
-import Data
+import           Data
 
 genPuzzle :: Puzzle -> String
 genPuzzle puzzle = "<svg xmlns=\"http://www.w3.org/2000/svg\" " ++ -- svg boilerplate
@@ -10,9 +10,11 @@ genPuzzle puzzle = "<svg xmlns=\"http://www.w3.org/2000/svg\" " ++ -- svg boiler
                    "</g></svg>"
 
 genGrid :: Grid -> String
-genGrid (Rectangle m n d gridstyle borderstyle) = "<rect x=\"0\" y=\"0\" width=\"" ++ show (d * n) ++ "\" height=\"" ++ show (d * m) ++ "\" " ++
-                                                  (if borderstyle == NormalLinestyle then "stroke-width=\"4\"" else "stroke-width=\"1\" stroke-dasharray = \"1, 2\" stroke-linecap=\"square\"") ++
-                                                  " fill=\"none\"/>" ++ -- outer rectangle
+genGrid (Rectangle m n d gridstyle borderstyle) = (if borderstyle == NormalLinestyle then "<rect x=\"-2\" y=\"-2\" width=\"" ++ show (d * n + 4) ++ "\" height=\"" ++ show (d * m + 4) ++
+                                                                                         "\" stroke-width=\"4\""
+                                                                                     else "<rect x=\"0\" y=\"0\" width=\"" ++ show (d * n) ++ "\" height = \"" ++ show (d * m) ++
+                                                                                         "\" stroke-width=\"1\" stroke-dasharray = \"1, 2\"") ++
+                                                  " stroke-linecap=\"square\" fill=\"none\"/>" ++ -- outer rectangle
                                                   ([1..(m-1)] >>= (\i -> genGridLine (0, 2 * i) (2 * n, 2 * i) 1 gridstyle d)) ++ -- horizontal grid lines
                                                   ([1..(n-1)] >>= (\j -> genGridLine (2 * j, 0) (2 * j, 2 * m) 1 gridstyle d)) -- vertical grid lines
 genGrid (Sudoku d) = genGrid (Rectangle 9 9 d NormalLinestyle NormalLinestyle) ++
@@ -98,21 +100,21 @@ genViewBox puzzle = let coords = puzzleObjects puzzle >>= objectCoords
                                            ] * d) 2)
 
 objectCoords :: Object -> [GridCoord]
-objectCoords (LocatedClueObject (LocatedClue _ location)) = [location]
+objectCoords (LocatedClueObject (LocatedClue _ location))      = [location]
 objectCoords (LineObject (Line (LineEndpoints start end) _ _)) = [start, end]
 
 gridHeight :: Grid -> Int
 gridHeight (Rectangle m _ _ _ _) = m
-gridHeight (Sudoku _) = 9 -- other kinds of grids might go here eventually, so this function isn't as silly as it looks
+gridHeight (Sudoku _)            = 9 -- other kinds of grids might go here eventually, so this function isn't as silly as it looks
 
 gridWidth :: Grid -> Int
 gridWidth (Rectangle _ n _ _ _) = n
-gridWidth (Sudoku _) = 9
+gridWidth (Sudoku _)            = 9
 
 safeMinimum :: (Ord a, Num a) => [a] -> a
 safeMinimum [] = 1
-safeMinimum l = minimum l
+safeMinimum l  = minimum l
 
 safeMaximum :: (Ord a, Num a) => [a] -> a
 safeMaximum [] = 1
-safeMaximum l = maximum l
+safeMaximum l  = maximum l
