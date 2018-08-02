@@ -29,6 +29,18 @@ genLocatedClue d (LocatedClue (BasicClue content) location) = let (x, y) = coord
                                                               in placeString x y 0 (quot d 4) (quot (2 * d) 3) content
 genLocatedClue d (LocatedClue (SmallClue content) location) = let (x, y) = coordTransform location d
                                                               in placeString x y (quot (-3 * d) 8) (quot (-5 * d) 18) (quot d 6) content
+genLocatedClue d (LocatedClue (Tapa2Clue n1 n2) location) = let (x, y) = coordTransform location d -- lots of fussy symbol positioning here
+                                                            in placeString x y (quot (-1 * d) 4) 0 (quot d 2) n1 ++
+                                                               placeString x y (quot d 4) (quot (3 * d) 8) (quot d 2) n2
+genLocatedClue d (LocatedClue (Tapa3Clue n1 n2 n3) location) = let (x, y) = coordTransform location d
+                                                               in placeString x y (quot (-1 * d) 4) 0 (quot d 2) n1 ++
+                                                                  placeString x y (quot d 4) 0 (quot d 2) n2 ++
+                                                                  placeString x y 0 (quot (3 * d) 8) (quot d 2) n3
+genLocatedClue d (LocatedClue (Tapa4Clue n1 n2 n3 n4) location) = let (x, y) = coordTransform location d
+                                                                  in placeString x y 0 (quot (-1 * d) 16) (quot d 2) n1 ++
+                                                                     placeString x y (quot (-1 * d) 4) (quot (3 * d) 16) (quot d 2) n2 ++
+                                                                     placeString x y (quot d 4) (quot (3 * d) 16) (quot d 2) n3 ++
+                                                                     placeString x y 0 (quot (7 * d) 16) (quot d 2) n4
 genLocatedClue d (LocatedClue ShadedCell location) = let (x, y) = coordTransform location d
                                                          e = quot d 2
                                                      in "<rect x=\"" ++ show (x - e) ++ "\" y=\"" ++ show (y - e) ++ "\" width=\"" ++ show d ++ "\" height=\"" ++ show d ++ "\"/>"

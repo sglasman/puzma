@@ -17,6 +17,9 @@ data LocatedClue = LocatedClue { locatedClueClue :: Clue,
 
 data Clue = BasicClue String |
             SmallClue String |
+            Tapa2Clue String String |
+            Tapa3Clue String String String |
+            Tapa4Clue String String String String |
             ShadedClue Clue |
             ShadedCell |
             EmptyCell |

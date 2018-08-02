@@ -85,7 +85,7 @@ gridLayoutP = do
                                                                                 (concat layoutRows)
 
 layoutListP :: Parser [Clue]
-layoutListP = sepBy layoutClueP (try (spaces >> optional (char ',')))
+layoutListP = endBy layoutClueP (try (spaces >> optional (char ',')))
 
 layoutClueP :: Parser Clue
 layoutClueP = (try (spaces >> char '#' >> return ShadedCell)) <|>
@@ -113,8 +113,21 @@ locatedClueP = do
                return LocatedClue { locatedClueClue = clue, locatedClueLocation = clueLocation }
 
 clueP :: Parser Clue
-clueP = (try unshadedCircleP) <|> (try shadedCircleP) <|> (try shadedClueP) <|> (try shadedCellP) <|>
+clueP = (try unshadedCircleP) <|> (try shadedCircleP) <|> (try tapaClueP) <|> (try shadedClueP) <|> (try shadedCellP) <|>
         (try smallClueP) <|> basicClueP
+
+tapaClueP :: Parser Clue
+tapaClueP = do
+            spaces >> ((try $ string "TapaClue") <|> string "TC")>> spaces >> char '{' >> spaces
+            tapaClueList <- endBy (many1 $ satisfy (\c -> not (elem c "}," || isSpace c)))
+                                  (try $ spaces >> optional (char ',') >> spaces)
+            char '}'
+            return $ case tapaClueList of
+                                       [n] -> BasicClue n
+                                       [n1, n2] -> Tapa2Clue n1 n2
+                                       [n1, n2, n3] -> Tapa3Clue n1 n2 n3
+                                       [n1, n2, n3, n4] -> Tapa4Clue n1 n2 n3 n4
+                                       _ -> error "Empty or overfull Tapa clue"
 
 shadedClueP :: Parser Clue
 shadedClueP = do
