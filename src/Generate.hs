@@ -1,6 +1,7 @@
 module Generate where
 
 import           Data
+import Utility
 
 genPuzzle :: Puzzle -> String
 genPuzzle puzzle = "<svg xmlns=\"http://www.w3.org/2000/svg\" " ++ -- svg boilerplate
@@ -20,6 +21,10 @@ genGrid (Rectangle m n d gridstyle borderstyle) = (if borderstyle == NormalLines
 genGrid (Sudoku d) = genGrid (Rectangle 9 9 d NormalLinestyle NormalLinestyle) ++
                      genGridLine (0, 6) (18, 6) 4 NormalLinestyle d ++ genGridLine (0, 12) (18, 12) 4 NormalLinestyle d ++
                      genGridLine (6, 0) (6, 18) 4 NormalLinestyle d ++ genGridLine (12, 0) (12, 18) 4 NormalLinestyle d
+genGrid (Slitherlink m n d) = concat (coordArrayInterstitial m n) >>=
+                              \coord -> let (x, y) = coordTransform coord d
+                                        in "<rect x=\"" ++ show (x - 2) ++ "\" y=\"" ++ show (y - 2) ++
+                                           "\" width=\"4\" height=\"4\"/>"
 
 genObject :: Int -> Object -> String
 genObject d (LocatedClueObject locatedClueObject) = genLocatedClue d locatedClueObject
@@ -76,9 +81,6 @@ genPixLine (x1, y1) (x2, y2) w linestyle = "<line x1=\"" ++ show x1 ++ "\" x2=\"
 coordTransform :: GridCoord -> Int -> PixelCoord
 coordTransform (x, y) d = ((d * x) `quot` 2, (d * y) `quot` 2)
 
-constDashlength :: Int
-constDashlength = 2
-
 -- All functions below this point are for calculating and generating the viewbox
 
 genViewBox :: Puzzle -> String
@@ -105,11 +107,13 @@ objectCoords (LineObject (Line (LineEndpoints start end) _ _)) = [start, end]
 
 gridHeight :: Grid -> Int
 gridHeight (Rectangle m _ _ _ _) = m
-gridHeight (Sudoku _)            = 9 -- other kinds of grids might go here eventually, so this function isn't as silly as it looks
+gridHeight (Sudoku _)            = 9
+gridHeight (Slitherlink m _ _) = m-- other kinds of grids might go here eventually, so this function isn't as silly as it looks
 
 gridWidth :: Grid -> Int
 gridWidth (Rectangle _ n _ _ _) = n
 gridWidth (Sudoku _)            = 9
+gridWidth (Slitherlink _ n _) = n
 
 safeMinimum :: (Ord a, Num a) => [a] -> a
 safeMinimum [] = 1

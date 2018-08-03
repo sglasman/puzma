@@ -5,6 +5,7 @@ import Text.ParserCombinators.Parsec.Number
 import Data.Char
 
 import Data
+import Utility
 
 type Parser a = Parsec String () a
 
@@ -20,7 +21,7 @@ puzma = do
 -- Grid parsers
 
 gridP :: Parser Grid
-gridP = (try rectangleGridP) <|> sudokuGridP
+gridP = (try rectangleGridP) <|> (try sudokuGridP) <|> slitherlinkGridP
 
 rectangleGridP :: Parser Grid
 rectangleGridP = do
@@ -28,10 +29,10 @@ rectangleGridP = do
                  gridProperties <- sepBy propertyP (try $ spaces >> char ',')
                  spaces >> char '}'
                  return Rectangle { height = maybe (error "Error: grid has undefined height") read $ lookup "height" gridProperties,
-                                   width = maybe (error "Error: grid has undefined width") read $ lookup "width" gridProperties,
-                                   gridsize = maybe 36 read $ lookup "gridsize" gridProperties,
-                                   gridstyle = maybe NormalLinestyle stringToLinestyle $ lookup "gridstyle" gridProperties,
-                                   borderstyle = maybe NormalLinestyle stringToLinestyle $ lookup "borderstyle" gridProperties }
+                                    width = maybe (error "Error: grid has undefined width") read $ lookup "width" gridProperties,
+                                    gridsize = maybe 36 read $ lookup "gridsize" gridProperties,
+                                    gridstyle = maybe NormalLinestyle stringToLinestyle $ lookup "gridstyle" gridProperties,
+                                    borderstyle = maybe NormalLinestyle stringToLinestyle $ lookup "borderstyle" gridProperties }
 
 sudokuGridP :: Parser Grid
 sudokuGridP = do
@@ -40,13 +41,22 @@ sudokuGridP = do
               spaces >> char '}'
               return Sudoku { gridsize = maybe 36 read $ lookup "gridsize" gridProperties }
 
+slitherlinkGridP :: Parser Grid
+slitherlinkGridP = do
+                   spaces >> string "SlitherlinkGrid" >> spaces >> char '{'
+                   gridProperties <- sepBy propertyP (try $ spaces >> char ',')
+                   spaces >> char '}'
+                   return Slitherlink { height = maybe (error "Error: grid has undefined height") read $ lookup "height" gridProperties,
+                                        width = maybe (error "Error: grid has undefined width") read $ lookup "width" gridProperties,
+                                        gridsize = maybe 36 read $ lookup "gridsize" gridProperties }
+
 propertyP :: Parser (String, String)
 propertyP = do
-           spaces
-           key <- many1 letter
-           spaces >> char ':' >> spaces
-           value <- many1 $ noneOf [',', '}', ' ']
-           return (key, value)
+            spaces
+            key <- many1 letter
+            spaces >> char ':' >> spaces
+            value <- many1 $ noneOf [',', '}', ' ']
+            return (key, value)
 
 stringToLinestyle :: String -> Linestyle
 stringToLinestyle "normal" = NormalLinestyle
@@ -206,20 +216,7 @@ lineEndpointsP = do
                  end <- coordinateP
                  spaces >> char ']'
                  return $ LineEndpoints start end
-
-normalizeCentral :: Int -> Int
-normalizeCentral n = 2 * n - 1
-
-normalizeInterstitial :: Int -> Int
-normalizeInterstitial n = 2 * n
                
 notSpace :: Parser Char
 notSpace = satisfy (not . isSpace)
 
-allEqual :: (Eq a) => [a] -> Bool
-allEqual [] = True
-allEqual [x] = True
-allEqual (x:xs) = (x == head xs) && allEqual xs
-
-coordArray :: Int -> Int -> [[GridCoord]]
-coordArray height width = map (\x -> [(y, x) | y <- map normalizeCentral [1..width]]) $ map normalizeCentral [1..height]

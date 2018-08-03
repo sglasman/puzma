@@ -1,18 +1,21 @@
 module Data where
 
-data Puzzle = Puzzle { puzzleGrid :: Grid,
+data Puzzle = Puzzle { puzzleGrid    :: Grid,
                        puzzleObjects :: [Object] } deriving (Show)
-    
-data Grid = Rectangle { height :: Int,
-                        width :: Int,
-                        gridsize :: Int,
-                        gridstyle :: Linestyle,
+
+data Grid = Rectangle { height      :: Int,
+                        width       :: Int,
+                        gridsize    :: Int,
+                        gridstyle   :: Linestyle,
                         borderstyle :: Linestyle } |
-            Sudoku { gridsize :: Int } deriving (Show)
+            Sudoku { gridsize :: Int } |
+            Slitherlink { height :: Int,
+                          width  :: Int,
+                          gridsize :: Int } deriving (Show)
 
 data Object = LineObject Line | LocatedClueObject LocatedClue deriving (Show)
 
-data LocatedClue = LocatedClue { locatedClueClue :: Clue,
+data LocatedClue = LocatedClue { locatedClueClue     :: Clue,
                                  locatedClueLocation :: GridCoord } deriving (Show)
 
 data Clue = BasicClue String |
@@ -28,10 +31,10 @@ data Clue = BasicClue String |
 
 data Line = Line { lineEndpoints :: LineEndpoints,
                    lineThickness :: Int,
-                   linestyle :: Linestyle } deriving (Show)
+                   linestyle     :: Linestyle } deriving (Show)
 
 data LineEndpoints = LineEndpoints { lineStart :: GridCoord,
-                                     lineEnd :: GridCoord } deriving (Show)
+                                     lineEnd   :: GridCoord } deriving (Show)
 
 data Linestyle = NormalLinestyle | DottedLinestyle deriving (Show, Eq)
 
