@@ -1,2 +1,2 @@
 RectangleGrid {height:3, width:3}
-GridLayout [132|_#{11}|_0#]
+GridLayout [1{TapaClue{1 3}}2|_{UnshadedCircle}{11}|_0#]
