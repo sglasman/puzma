@@ -1,0 +1,9 @@
+RectangleGrid {height:4, width:4}
+ThickLineLayout [_i_|
+                 _--_|
+                 i_i|
+                 -__-|
+                 i_i|
+                 _--_|
+                 _i_]
+                  

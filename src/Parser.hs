@@ -13,7 +13,7 @@ puzma :: Parser Puzzle
 puzma = do
         grid <- gridP
         layoutObjects <- concat <$> (many $ try layoutP)
-        otherObjects <- many objectP
+        otherObjects <- many $ try objectP
         spaces >> eof
         return Puzzle { puzzleGrid = grid,
                         puzzleObjects = layoutObjects ++ otherObjects }
@@ -66,7 +66,7 @@ stringToLinestyle _ = error "Invalid line style in grid declaration"
 -- Layout parsers
 
 layoutP :: Parser [Object]
-layoutP = (try rowColLayoutP) <|> gridLayoutP
+layoutP = try rowColLayoutP <|> try gridLayoutP <|> thickLineLayoutP
 
 rowColLayoutP :: Parser [Object]
 rowColLayoutP = do
@@ -93,6 +93,40 @@ gridLayoutP = do
                                                           else return $ zipWith buildLocatedClue
                                                                                 (concat $ coordArray (length layoutRows) (length $ layoutRows !! 0))
                                                                                 (concat layoutRows)
+
+thickLineLayoutP :: Parser [Object]
+thickLineLayoutP = do
+                   spaces >> string "ThickLineLayout" >> spaces >> char '['
+                   rows <- sepBy lineLayoutRowP (try $ spaces >> char '|')
+                   spaces >> char ']'
+                   let zippedRows = zip
+                                    (interleave (map normalizeInterstitial [0..]) (map normalizeInterstitial [1..]))
+                                    rows -- :: [(Int, String)]
+                   return (zippedRows >>= thickLineLayoutObjectProducer) -- This doesn't check for enough syntactic correctness of the ThickLineLayout, but it'll do for now
+
+thickLineLayoutObjectProducer :: (Int, String) -> [Object]
+thickLineLayoutObjectProducer (rownumber, s) = zip (map normalizeInterstitial [0..]) s >>=
+                                               (\c -> case c of
+                                                           (colnumber, '_') -> []
+                                                           (colnumber, 'i') -> [LineObject $ Line {
+                                                                                             lineEndpoints = LineEndpoints (colnumber + 2, rownumber)
+                                                                                                                           (colnumber + 2, rownumber + 2),
+                                                                                             lineThickness = 4,
+                                                                                             linestyle = NormalLinestyle
+                                                                                             }
+                                                                               ]
+                                                           (colnumber, '-') -> [LineObject $ Line {
+                                                                                             lineEndpoints = LineEndpoints (colnumber, rownumber)
+                                                                                                                           (colnumber + 2, rownumber),
+                                                                                             lineThickness = 4,
+                                                                                             linestyle = NormalLinestyle
+                                                                                             }
+                                                                               ]
+                                               )
+
+lineLayoutRowP :: Parser String
+lineLayoutRowP = spaces >> endBy (oneOf ['_', 'i', '-'])
+                                      (try (spaces >> optional (char ',')))
 
 layoutListP :: Parser [Clue]
 layoutListP = endBy layoutClueP (try (spaces >> optional (char ',')))
