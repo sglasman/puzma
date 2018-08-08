@@ -43,7 +43,7 @@ The grid declaration is of the form
 GRID TYPE { GRID PROPERTIES }
 ```
 
-The currently implemented grid types are `RectangleGrid` and `SudokuGrid`. A grid property is a property name separated by a colon from a property value (for example, `height: 5`). Grid properties must be separated by commas. A `RectangleGrid` must have the grid properties `height` and `width` specified, giving the dimensions of the grid in cells. The other implemented grid property is `gridsize`, the side length of a grid cell in pixels, which defaults to 36 if not specified.
+The currently implemented grid types are `RectangleGrid`, `SudokuGrid` and `SlitherlinkGrid`. A grid property is a property name separated by a colon from a property value (for example, `height: 5`). Grid properties must be separated by commas. A `RectangleGrid` must have the grid properties `height` and `width` specified, giving the dimensions of the grid in cells. The other implemented grid property is `gridsize`, the side length of a grid cell in pixels, which defaults to 36 if not specified.
 
 The shortest legal Puzma program is
 ```
@@ -62,7 +62,15 @@ and
 ```
 ThickLine [START COORDINATE, END COORDINATE]
 ```
-Currently implemented clue types are simple text clues of the form `Clue {TEXT}`, as well as shaded cells, specified as `ShadedCell` or simply `#`. More kinds of clues will be implemented soon. The `ThickLine` declaration is for drawing a thicker line on the grid, a feature used in many puzzle types (Star Battle, Heyawake).
+A list of currently implemented clue types is as follows:
+* `Clue {CONTENT}` or simply `{CONTENT}` to place a plain string clue.
+* `ShadedCell` or `#` to place a shaded cell.
+* `ShadedClue {CONTENT}` or `#{CONTENT}` to place a shaded cell containing a white-on-black clue.
+* `SmallClue {CONTENT}` to place a tiny clue at the top left of a cell. This is necessary in TomTom, for instance.
+* `TapaClue {n1, n2..}` to place a Tapa clue with one to four elements.
+* `UnshadedCircle` and `ShadedCircle`.
+
+The `ThickLine` declaration is for drawing a thicker line on the grid, a feature used in many puzzle types (Star Battle, Heyawake).
 
 Puzma uses a simple, flexible coordinate system. Coordinates in parentheses `(a, b)` represent the center of cells; the convention is that `(1, 1)` is the top left cell. Coordinates in angle brackets `<a, b>` represent grid interstices; the convention is that `<0, 0>` is the top left corner of the grid. Central and interstitial coordinates can even be mixed: an object at `(a, b>` will be placed halfway along a vertical grid line between two vertices. This will be useful in typesetting puzzles such as Kropki.
 
@@ -75,12 +83,12 @@ This has the form
 ```
 GridLayout [CLUES|CLUES|...|CLUES]
 ```
-where each row of clues is separated by a pipe `|`, and the whole lot is enclosed in square brackets. Clues are read from left to right then top to bottom. Single character clues can be written as is; multi-character clues should be enclosed in braces `{ }`. An unadorned `#` will give a shaded cell, and an underscore `_` will give an empty cell. Clues in a row may be optionally separated by commas.
+where each row of clues is separated by a pipe `|`, and the whole lot is enclosed in square brackets. Clues are read from left to right then top to bottom. Single character plain clues can be written as is; multi-character clues or other kinds of clues should be enclosed in braces `{ }`. An unadorned `#` will give a shaded cell, and an underscore `_` will give an empty cell. Clues in a row may be optionally separated by commas.
 
 As an illustration, the code
 ```
 RectangleGrid {height:3, width:3}
-GridLayout [132|_#{11}|_0#]
+GridLayout [1{TapaClue{1 3}}2|_{UnshadedCircle}{11}|_0#]
 ```
 generates the image
 
