@@ -23,6 +23,12 @@ data Clue = BasicClue String |
             Tapa2Clue String String |
             Tapa3Clue String String String |
             Tapa4Clue String String String String |
+            Battleship1 |
+            BattleshipMiddle |
+            BattleshipLeftEnd |
+            BattleshipRightEnd |
+            BattleshipBottomEnd |
+            BattleshipTopEnd |
             ShadedClue Clue |
             ShadedCell |
             EmptyCell |

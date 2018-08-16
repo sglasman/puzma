@@ -1,0 +1,17 @@
+RectangleGrid {height: 10, width: 10}
+GridLayout [__{BattleshipTopEnd}_______|
+            __{BattleshipMiddle}________|
+            __{BattleshipBottomEnd}______|
+            ___________|
+            ______{Battleship1}___|
+            |
+            ___________|
+            _____|
+            _____{BattleshipLeftEnd}{BM}{BM}{BattleshipRightEnd}_4|
+            _|
+            __3|
+            ___________|
+            ___{BLE}{BM}{BM}{BRE}____|
+            _{BLE}{BM}{BRE}__{BLE}{BM}{BRE}__|
+            _{BLE}{BRE}_{BLE}{BRE}_{BLE}{BRE}__|
+            {B1}__{B1}__{B1}__{B1}_]

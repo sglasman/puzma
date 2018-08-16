@@ -89,10 +89,9 @@ gridLayoutP = do
               spaces >> string "GridLayout" >> spaces >> char '['
               layoutRows <- sepBy layoutListP (try $ spaces >> char '|')
               spaces >> char ']'
-              if (not . allEqual $ map length layoutRows) then (error "Error: layout not rectangular")
-                                                          else return $ zipWith buildLocatedClue
-                                                                                (concat $ coordArray (length layoutRows) (length $ layoutRows !! 0))
-                                                                                (concat layoutRows)
+              return . concat $ zipWith (zipWith buildLocatedClue)
+                                (coordArray (length layoutRows) (maximum $ map length layoutRows))
+                                layoutRows
 
 thickLineLayoutP :: Parser [Object]
 thickLineLayoutP = do
@@ -129,12 +128,12 @@ lineLayoutRowP = spaces >> endBy (oneOf ['_', 'i', '-'])
                                       (try (spaces >> optional (char ',')))
 
 layoutListP :: Parser [Clue]
-layoutListP = endBy layoutClueP (try (spaces >> optional (char ',')))
+layoutListP = (try (endBy layoutClueP (try (spaces >> optional (char ','))))) <|> (spaces >> return []) -- the last option allows for empty rows in a layout
 
 layoutClueP :: Parser Clue
 layoutClueP = (try (spaces >> char '#' >> return ShadedCell)) <|>
               (try (spaces >> char '_' >> return EmptyCell)) <|>
-              (try spaces >> (BasicClue . return <$> noneOf ['|', ',', '#', '{', '}', '[', ']', '_'])) <|>
+              (try (spaces >> (BasicClue . return <$> noneOf ['|', ',', '#', '{', '}', '[', ']', '_']))) <|>
               (do
                spaces >> char '{'
                clue <- (try clueP <|> (BasicClue <$> (many $ satisfy (/= '}'))))
@@ -157,8 +156,9 @@ locatedClueP = do
                return LocatedClue { locatedClueClue = clue, locatedClueLocation = clueLocation }
 
 clueP :: Parser Clue
-clueP = (try unshadedCircleP) <|> (try shadedCircleP) <|> (try tapaClueP) <|> (try shadedClueP) <|> (try shadedCellP) <|>
-        (try smallClueP) <|> basicClueP
+clueP = (try unshadedCircleP) <|> (try shadedCircleP) <|> (try tapaClueP) <|> (try battleship1P) <|> (try battleshipMiddleP) <|>
+        (try battleshipLeftEndP) <|> (try battleshipRightEndP) <|> (try battleshipBottomEndP) <|> (try battleshipTopEndP) <|>
+        (try shadedClueP) <|> (try shadedCellP) <|> (try smallClueP) <|> basicClueP
 
 tapaClueP :: Parser Clue
 tapaClueP = do
@@ -172,6 +172,24 @@ tapaClueP = do
                                        [n1, n2, n3] -> Tapa3Clue n1 n2 n3
                                        [n1, n2, n3, n4] -> Tapa4Clue n1 n2 n3 n4
                                        _ -> error "Empty or overfull Tapa clue"
+
+battleship1P :: Parser Clue
+battleship1P = spaces >> ((try $ string "Battleship1") <|> string "B1") >> return Battleship1
+
+battleshipMiddleP :: Parser Clue
+battleshipMiddleP = spaces >> ((try $ string "BattleshipMiddle") <|> string "BM") >> return BattleshipMiddle
+
+battleshipLeftEndP :: Parser Clue
+battleshipLeftEndP = spaces >> ((try $ string "BattleshipLeftEnd") <|> string "BLE") >> return BattleshipLeftEnd
+
+battleshipRightEndP :: Parser Clue
+battleshipRightEndP = spaces >> ((try $ string "BattleshipRightEnd") <|> string "BRE") >> return BattleshipRightEnd
+
+battleshipBottomEndP :: Parser Clue
+battleshipBottomEndP = spaces >> ((try $ string "BattleshipBottomEnd") <|> string "BBE") >> return BattleshipBottomEnd
+
+battleshipTopEndP :: Parser Clue
+battleshipTopEndP = spaces >> ((try $ string "BattleshipTopEnd") <|> string "BTE") >> return BattleshipTopEnd
 
 shadedClueP :: Parser Clue
 shadedClueP = do
