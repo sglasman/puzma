@@ -109,3 +109,26 @@ ColumnLayout (5, [EFGHI])
 generates the image
 
 <img src="https://github.com/sglasman/puzma/blob/master/examples/rowlayout-example.svg" height=504 width=576/>
+
+#### The thick line layout declaration
+
+Similarly, in a puzzle with an elaborate arrangement of thick lines, it might be excessively cumbersome to write a separate declaration for each line segment. Instead, one can write a thick line layout, whose syntax is best illustrated first with an example: the code
+```
+RectangleGrid {height:4, width:4}
+ThickLineLayout [_i_|
+                 _--_|
+                 i_i|
+                 -__-|
+                 i_i|
+                 _--_|
+                 _i_]
+```
+generates the image
+
+<img src="https://github.com/sglasman/puzma/blob/master/examples/thicklinelayout-example.svg" height=432 width=432/>
+
+In any row of a grid of width `n`, there are `n - 1` short vertical line segments that may be thickened (this excludes the grid's left and right boundary lines, which are thick by default). Between any two rows, there are `n` short horizontal line segments that may be thickened. The rows (separated by `|`s) of the ThickLineLayout declaration correspond alternately to these two situations. An `i` indicates a vertical line segment to be thickened, a dash `-` indicates a horizontal line segment to be thickened, and an underscore `_` denotes a line segment left as is. The line breaks are unnecessary to Puzma, and included strictly for readability.
+
+### More examples
+
+In the /examples/ folder of the repository, I've included some more examples of Puzma code, which together exhibit all of the graphical features currently implemented.
